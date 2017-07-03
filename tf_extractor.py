@@ -1,4 +1,3 @@
-#!/usr/bin/env python  
 import rospy, tf2_ros, argparse
 import numpy as np
 
