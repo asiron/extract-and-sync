@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import rosbag, argparse, cv2, os
 import numpy as np
 
@@ -62,6 +61,7 @@ if __name__ == '__main__':
     if abs(best_transform_delay) > args.threshold:
       log = '{0:05d}/{1:05d} Best transform exceeded threshold, dropping frame...'
       tqdm.write(log.format(n, img_count))
+      continue
 
     try:
       cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
