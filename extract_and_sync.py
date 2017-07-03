@@ -45,6 +45,9 @@ if __name__ == '__main__':
 
     while True:
 
+      if transforms_index >= transforms.shape[0]:
+        break
+
       cur_transform = transforms[transforms_index]
       cur_transform_stamp = cur_transform[0]
       cur_delay = abs(cur_image_stamp - cur_transform_stamp)
@@ -58,6 +61,7 @@ if __name__ == '__main__':
 
     generator.set_description('Current best transform: {:.3f}'.format(best_transform_delay))
     generator.refresh()
+
     if abs(best_transform_delay) > args.threshold:
       log = '{0:05d}/{1:05d} Best transform exceeded threshold, dropping frame...'
       tqdm.write(log.format(n, img_count))

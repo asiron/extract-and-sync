@@ -34,6 +34,7 @@ NUMPY_FILE=${ALL_TRANSFORMS_DIR}/poses.npy
 python tf_extractor.py -f ${MAP_FRAME_ID} -t ${CAMERA_FRAME_ID} -v -o ${NUMPY_FILE} &
 echo 'TF extraction node started!'
 rosbag play -d 3 -r ${ROSBAG_RATE} $ROSBAG
+sleep 1
 echo 'Finished extracting TF transforms'
 kill -INT %1
 echo 'Starting image extract and sync'
