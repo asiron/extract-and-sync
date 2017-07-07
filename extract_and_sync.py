@@ -7,9 +7,6 @@ from cv_bridge import CvBridge, CvBridgeError
 
 DEFAULT_IMAGE_TOPIC = "/dji_sdk/image_raw"
 
-def rosstamp_to_float(stamp):
-  return stamp.secs + stamp.nsecs / 1000000000.0
-
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="ROS Bag image extraction and sync tool")
   parser.add_argument('output', type=str, help='Output directory for acquired traces')
@@ -40,31 +37,25 @@ if __name__ == '__main__':
   generator = tqdm(enumerate(bag.read_messages(topics=[args.topic])), total=img_count)
   for n, (_, msg, _) in generator:
 
-    cur_image_stamp = rosstamp_to_float(msg.header.stamp)
-    best_transform_delay = np.inf
+    cur_image_stamp = msg.header.stamp.to_sec()
 
-    while True:
+    idx = np.searchsorted(transforms[:,0], cur_image_stamp)
 
-      if transforms_index >= transforms.shape[0]:
-        break
+    if idx in [0, transforms.shape[0]]:
+      delay = abs(cur_image_stamp - transforms[idx,0])
+      if delay > args.threshold:
+        tqdm.write('Threshold exceeded at first/last transform' + str(delay))
+        continue
 
-      cur_transform = transforms[transforms_index]
-      cur_transform_stamp = cur_transform[0]
-      cur_delay = abs(cur_image_stamp - cur_transform_stamp)
+    idx += np.argmin(np.abs(transforms[idx:idx+1, 0]))
+    best_transform_delay = np.abs(cur_image_stamp - transforms[idx, 0])
 
-      if cur_delay <= best_transform_delay:
-        best_transform_delay = cur_delay
-      else:
-        break
-
-      transforms_index += 1
-
-    generator.set_description('Current best transform: {:.3f}'.format(best_transform_delay))
+    generator.set_description('Current best transform delay: {:.3f}'.format(best_transform_delay))
     generator.refresh()
 
-    if abs(best_transform_delay) > args.threshold:
-      log = '{0:05d}/{1:05d} Best transform exceeded threshold, dropping frame...'
-      tqdm.write(log.format(n, img_count))
+    if best_transform_delay > args.threshold:
+      log = '{0:05d}/{1:05d} Best transform exceeded threshold with {2:.7f}, dropping frame...'
+      tqdm.write(log.format(n, img_count-1, best_transform_delay))
       continue
 
     try:
@@ -84,4 +75,3 @@ if __name__ == '__main__':
     synced_ctr += 1
 
   bag.close()
-

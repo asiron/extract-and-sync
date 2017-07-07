@@ -16,4 +16,5 @@ numpy
 tqdm
 tf2_ros
 cv2
+tf_conversions
 ```

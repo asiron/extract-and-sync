@@ -1,16 +1,17 @@
-import rospy, tf2_ros, argparse
+[import rospy, tf2_ros, argparse
 import numpy as np
+import tf_conversions as tfc
 
-rosstamp_to_float = lambda secs, nsecs: secs + nsecs / 1000000000.0
+quat_to_euler = lambda q: tfc.transformations.euler_from_quaternion(q)
+remove_first_slash = lambda s: s if s[0] != '/' else s[1:]
 
 class TFExtractor:
 
   def __init__(self, from_frame_id, to_frame_id, filename, verbose):
     self.tf_buffer = tf2_ros.Buffer()
     self.listener = tf2_ros.TransformListener(self.tf_buffer)
-    
-    self.from_frame_id = from_frame_id
-    self.to_frame_id = to_frame_id
+    self.from_frame_id = remove_first_slash(from_frame_id)
+    self.to_frame_id   = remove_first_slash(to_frame_id)
     self.filename = filename
     self.verbose = verbose
 
@@ -26,17 +27,17 @@ class TFExtractor:
         rate.sleep()
         continue
 
-      secs = t.header.stamp.secs
-      nsecs = t.header.stamp.nsecs
-      stamp = rosstamp_to_float(secs, nsecs)
+      stamp = t.header.stamp.to_sec()
 
       tran = t.transform.translation
       tran = (tran.x, tran.y, tran.z)
 
-      quat = t.transform.rotation
-      quat = (quat.x, quat.y, quat.z, quat.w)
+      rot = t.transform.rotation
+      rot = (rot.x, rot.y, rot.z, rot.w)
+      if args.rotation == 'euler':
+        rot = quat_to_euler(rot)
 
-      sample = (stamp,) + tran + quat
+      sample = (stamp,) + tran + rot
       self.transforms += [sample]
       counter += 1
 
@@ -54,9 +55,12 @@ if __name__ == '__main__':
   parser.add_argument('-t', '--to-frame-id', required=True, type=str, help='to frame id')
   parser.add_argument('-o', '--output', required=True, type=str, help='File to save the transform array to')
   parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode')
+  parser.add_argument('-r', '--rotation', choices=['euler', 'quat'], default='quat',
+    help='Type of represenation for rotation')
 
   args = parser.parse_args()
   rospy.init_node('tf_extractor')
 
   tfe = TFExtractor(args.from_frame_id, args.to_frame_id, args.output, args.verbose)
   tfe.run()
+]
