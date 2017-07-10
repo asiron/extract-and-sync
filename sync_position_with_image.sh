@@ -7,7 +7,7 @@ DEFAULT_TO_FRAME_ID=DJI/gimbal_base/camera
 DEFAULT_IMAGE_TOPIC=/dji_sdk/image_raw
 DEFAULT_ROTATION_CHOICE=quat
 
-ROSBAG_RATE=2
+ROSBAG_RATE=1
 
 function error_exit
 {
@@ -61,14 +61,14 @@ mkdir -p ${all_transforms_dir}
 
 echo "Saving all extracted transformations in ${numpy_file}"
 numpy_file=${all_transforms_dir}/poses.npy
-python tf_extractor.py -r ${rotation_choice} -f ${from_frame_id} -t ${to_frame_id} -v -o ${numpy_file} &
+# python tf_extractor.py -r ${rotation_choice} -f ${from_frame_id} -t ${to_frame_id} -v -o ${numpy_file} &
 
-echo 'TF extraction node started!'
-rosbag play -d 3 -r ${ROSBAG_RATE} ${rosbag}
-sleep 1
+# echo 'TF extraction node started!'
+# rosbag play -d 3 -r ${ROSBAG_RATE} ${rosbag}
+# sleep 1
 
-echo 'Finished extracting TF transforms'
-kill -INT %1
+# echo 'Finished extracting TF transforms'
+# kill -INT %1
 
 echo 'Starting image extract and sync'
 python extract_and_sync.py -b ${rosbag} -a ${numpy_file} -t ${image_topic} ${output_dir}

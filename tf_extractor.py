@@ -1,4 +1,4 @@
-[import rospy, tf2_ros, argparse
+import rospy, tf2_ros, argparse
 import numpy as np
 import tf_conversions as tfc
 
@@ -63,4 +63,3 @@ if __name__ == '__main__':
 
   tfe = TFExtractor(args.from_frame_id, args.to_frame_id, args.output, args.verbose)
   tfe.run()
-]

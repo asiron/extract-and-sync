@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     transform_filepath = 'pos_{0:05d}.txt'.format(synced_ctr)
     transform_filepath = os.path.join(output_dir, transform_filepath)
-    np.savetxt(transform_filepath, cur_transform.reshape((1,-1)), delimiter=',')
+    np.savetxt(transform_filepath, transforms[idx].reshape((1,-1)), delimiter=',')
     
     synced_ctr += 1
 
