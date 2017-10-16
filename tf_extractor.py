@@ -45,6 +45,7 @@ class TFExtractor:
         print '{}: {}'.format(counter, ','.join(map(str, sample)))
       rate.sleep()
 
+  def save(self):
     print 'Canceled! Saving...'
     np.save(self.filename, np.array(self.transforms))
     print 'Finished!'
@@ -61,5 +62,8 @@ if __name__ == '__main__':
   args = parser.parse_args()
   rospy.init_node('tf_extractor')
 
-  tfe = TFExtractor(args.from_frame_id, args.to_frame_id, args.output, args.verbose)
-  tfe.run()
+  try:
+    tfe = TFExtractor(args.from_frame_id, args.to_frame_id, args.output, args.verbose)
+    tfe.run()
+  except:
+    tfe.save()

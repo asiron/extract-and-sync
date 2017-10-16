@@ -28,12 +28,16 @@ if __name__ == '__main__':
   transforms_index = 0
 
   output_dir = args.output
-
-  if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-  synced_ctr = 0
+  #synced_ctr = 0
   
+  images_dir = os.path.join(output_dir, 'images')
+  if not os.path.exists(images_dir):
+    os.makedirs(images_dir)
+
+  transforms_dir = os.path.join(output_dir, 'labels')
+  if not os.path.exists(transforms_dir):
+    os.makedirs(transforms_dir)   
+
   generator = tqdm(enumerate(bag.read_messages(topics=[args.topic])), total=img_count)
   for n, (_, msg, _) in generator:
 
@@ -64,14 +68,16 @@ if __name__ == '__main__':
       tqdm.write(e)
       continue
 
-    image_filepath = 'image_{0:05d}.png'.format(synced_ctr)
-    image_filepath = os.path.join(output_dir, image_filepath)
+    #image_filepath = 'image_{0:05d}.png'.format(synced_ctr)
+    image_filepath = 'image_{0:05d}.png'.format(n)
+    image_filepath = os.path.join(images_dir, image_filepath)
     cv2.imwrite(image_filepath, cv_image)
 
-    transform_filepath = 'pos_{0:05d}.txt'.format(synced_ctr)
-    transform_filepath = os.path.join(output_dir, transform_filepath)
+    #transform_filepath = 'pos_{0:05d}.txt'.format(synced_ctr)
+    transform_filepath = 'pos_{0:05d}.txt'.format(n)
+    transform_filepath = os.path.join(transforms_dir, transform_filepath)
     np.savetxt(transform_filepath, transforms[idx].reshape((1,-1)), delimiter=',')
     
-    synced_ctr += 1
+    #synced_ctr += 1
 
   bag.close()
